@@ -13,8 +13,18 @@
 ## Compatibility
 * \>= IE 8
 
-## How it works
-To see the plugin in action, check out the [demo](http://ggergo.com/jquery-miller-columns).
+## Installation
+**Via npm:**
+
+Run in your console: `npm install jquery-miller-columns`
+
+**Via bower:**
+
+`bower install jquery-miller-columns`
+
+**Manual installation:**
+
+Download the [latest release](https://github.com/ggergo/jquery-miller-columns/releases).
 
 #### Easy to use
 1. Add a DOM element with an id attribute to the document.
@@ -44,7 +54,7 @@ $('#my-miller-column').ggergoMillerColumns(/* { settings... } */);
 | root           | 1                            | root option id                              |
 | column         | 'ul'                         | the column element tag name                 |
 | option         | 'li'                         | the option element tag name                 |
-| childs         | function (id) {}             | return array of child id-s                  |
+| children       | function (id) {}             | return array of child id-s                  |
 | optionContent  | function (id) { return {}; } | return html content of option               |
 | optionAttr     | function (id) { return {}; } | return object of option attributes          |
 | columnAttr     | function (id) { return {}; } | return object of column attributes          |
