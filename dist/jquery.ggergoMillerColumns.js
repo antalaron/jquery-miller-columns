@@ -1,4 +1,40 @@
-;(function( $ )
+/*!
+ * A jQuery implementation of Miller columns.
+ *
+ * (c) Gergő Gänszler <ganszler.gergo@gmail.com>
+ *
+ * Released under the MIT license
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+(function (factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['jquery'], factory);
+    } else if (typeof module === 'object' && module.exports) {
+        // Node/CommonJS
+        module.exports = function( root, jQuery ) {
+            if ( jQuery === undefined ) {
+                // require('jQuery') returns a factory that requires window to
+                // build a jQuery instance, we normalize how we use modules
+                // that require this pattern but the window provided is a noop
+                // if it's defined (how jquery works)
+                if ( typeof window !== 'undefined' ) {
+                    jQuery = require('jquery');
+                }
+                else {
+                    jQuery = require('jquery')(root);
+                }
+            }
+            factory(jQuery);
+            return jQuery;
+        };
+    } else {
+        // Browser globals
+        factory(jQuery);
+    }
+}(function ($)
 {
     var pluginName  = 'ggergoMillerColumns',
         defaults    =
@@ -6,7 +42,7 @@
             root            :   1,
             column          :   'ul',
             option          :   'li',
-            childs          :   function (id) {},
+            children        :   function (id) {},
             optionContent   :   function (id) {},
             optionAttr      :   function (id) { return { 'tabindex': '1' }; },
             columnAttr      :   function (id) { return {}; },
@@ -25,54 +61,54 @@
                                 0 < $(event.target).prev('*[data-parentId]').children('*[data-id]').length      ? $(event.target).prev('*[data-parentId]').children('*[class~="selected"]') :
                                 0 < $('#'+this.attr('id')+' *[class~="selected"]').length                       ? $('#'+this.attr('id')+' *[class~="selected"]').last() :
                                 $('#'+this.attr('id')+' *[data-id]:first-child');
-                
-                if (this.data('ggergo-mc').childs.call(this, option.attr('data-id')).length > 0)
+
+                if (this.data('ggergo-mc').children.call(this, option.attr('data-id')).length > 0)
                 {
                     event.preventDefault();
                 }
-                
+
                 // return option for selecting node
                 return option;
             }
         };
-    
-    var showChilds = function (id, childs)
+
+    var showChildren = function (id, children)
     {
-        if (childs.length > 0)
+        if (children.length > 0)
         {
             var $this = this;
             var column = $('<'+this.data('ggergo-mc').column+'/>', this.data('ggergo-mc').columnAttr.call(this,id))
                                 .attr('data-parentId', id)
-            
-            for(var i = 0; i < childs.length; i++)
+
+            for(var i = 0; i < children.length; i++)
             {
-                var option = $('<'+$this.data('ggergo-mc').option+'/>', $this.data('ggergo-mc').optionAttr.call(this,childs[i]))
-                                .attr('data-id', childs[i])
-                                .html($this.data('ggergo-mc').optionContent.call($this,childs[i]));
+                var option = $('<'+$this.data('ggergo-mc').option+'/>', $this.data('ggergo-mc').optionAttr.call(this,children[i]))
+                                .attr('data-id', children[i])
+                                .html($this.data('ggergo-mc').optionContent.call($this,children[i]));
                 column.append(option);
             }
-            
+
             this.append(column);
         }
     }
-    
+
     var methods =
     {
         init : function( parameters )
         {
             if (typeof this.attr('id') === 'undefined' || this.attr('id') === '') { $.error('Selected element must have id attribute!') }
-            
+
             var $this = this;
             if ( typeof(this.data('ggergo-mc')) === 'undefined' )
             {
                 // merge settings
                 this.data('ggergo-mc', $.extend({}, defaults, parameters));
-                
+
                 // attach click event listener
                 $(document).on('click', '#'+this.attr('id'), function (event)
                 {
                     var option = $this.data('ggergo-mc').onClick.call($(this), event);
-                    
+
                     if (typeof option !== 'undefined' && option !== null)
                     {
                         methods.selectNode.call($this, option);
@@ -84,16 +120,16 @@
                 // merge settings
                 this.data('ggergo-mc', $.extend({}, this.data('ggergo-mc'), parameters));
             }
-            
+
             // select root node
             this.html('');
             methods.selectNode.call(this, this.data('ggergo-mc').root);
         },
-        
+
         selectNode : function (option)
         {
             var id;
-            
+
             // existing
             if (typeof option === 'object')
             {
@@ -101,10 +137,10 @@
                 {
                     $('#'+this.attr('id')+' *[data-parentId]:last').remove();
                 }
-                
+
                 option.parent().children('*[data-id]').removeClass('selected');
                 option.addClass('selected');
-                
+
                 id = option.attr('data-id');
             }
             // non existent
@@ -113,18 +149,18 @@
                 id = option;
                 option = $('#'+this.attr('id')+' *[data-id="'+id+'"]').last();
             }
-            
-            showChilds.call(this, id, this.data('ggergo-mc').childs.call(this, id));
-            
+
+            showChildren.call(this, id, this.data('ggergo-mc').children.call(this, id));
+
             this.data('ggergo-mc').selectCallback.call(this,option);
         }
     };
-    
+
     $.fn[pluginName] = function(method)
     {
         return  methods[method]                         ? methods[method].apply( this, Array.prototype.slice.call( arguments, 1 )) :
                 typeof method === 'object' || ! method  ? methods.init.apply( this, arguments ) :
                 $.error( 'Method ' +  method + ' does not exist on jQuery.' + pluginName );
     };
-    
-})( jQuery );
+
+}));
